@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2-sample-deployment
+  namespace: oauth2-sample
+  labels:
+    app: oauth2-sample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth2-sample
+  template:
+    metadata:
+      name: oauth2-sample
+      labels:
+        app: oauth2-sample
+    spec:
+      containers:
+        - name: oauth2-sample
+          image: ghcr.io/umalmyha/oauth2-sample:latest
+          imagePullPolicy: Always
+          env:
+            - name: HTTP_SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: HTTP_SERVER_PORT
+                  name: oauth2-sample-config-map
+            - name: JWT_ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  key: JWT_ISSUER
+                  name: oauth2-sample-config-map
+            - name: JWT_TTL
+              valueFrom:
+                configMapKeyRef:
+                  key: JWT_TTL
+                  name: oauth2-sample-config-map
+            - name: JWT_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: JWT_PRIVATE_KEY
+                  name: oauth2-sample-secrets
+            - name: OAUTH_CREDENTIALS_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: OAUTH_CREDENTIALS_CLIENT_ID
+                  name: oauth2-sample-secrets
+            - name: OAUTH_CREDENTIALS_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: OAUTH_CREDENTIALS_CLIENT_SECRET
+                  name: oauth2-sample-secrets
