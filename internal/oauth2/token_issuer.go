@@ -7,6 +7,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const TokenTypeBearer = "bearer"
+
 type TokenIssuer struct {
 	key *rsa.PrivateKey
 	cfg *Config
@@ -32,8 +34,6 @@ func NewTokenIssuer(key rsa.PrivateKey, opts ...ConfigFunc) *TokenIssuer {
 }
 
 func (i *TokenIssuer) Issue(issueAt time.Time) (AccessToken, error) {
-	const tokenTypeBearer = "bearer"
-
 	claims := jwt.RegisteredClaims{
 		Issuer:   i.cfg.issuer,
 		IssuedAt: jwt.NewNumericDate(issueAt),
@@ -49,7 +49,7 @@ func (i *TokenIssuer) Issue(issueAt time.Time) (AccessToken, error) {
 
 	return AccessToken{
 		AccessToken: signed,
-		Type:        tokenTypeBearer,
+		Type:        TokenTypeBearer,
 		ExpiresIn:   i.cfg.ttlSeconds,
 	}, nil
 }

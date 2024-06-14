@@ -36,12 +36,12 @@ Make HTTP request to server supplying credentials set before:
 curl -X POST 'localhost:8080/token' -u "${OAUTH_CREDENTIALS_CLIENT_ID}:${OAUTH_CREDENTIALS_CLIENT_SECRET}"
 ```
 
-### 2. Deploy to minikube
+### 2. Deploy to Kubernetes (minikube)
 Make sure minikube is installed, up and running:
 ```console
 minikube status
 ```
-Server configuration is located in [k8s/config.yaml](./k8s/config.yaml) config map. `JWT_PRIVATE_KEY` is generated via `openssl genrsa 2048`:
+Server configuration is located in [k8s/config.yaml](./k8s/config.yaml) config map. `JWT_PRIVATE_KEY` is generated via `openssl genrsa 2048` in case not passed:
 ```console
 make minikube OAUTH_CREDENTIALS_CLIENT_ID=${OAUTH_CREDENTIALS_CLIENT_ID} \
               OAUTH_CREDENTIALS_CLIENT_SECRET=${OAUTH_CREDENTIALS_CLIENT_SECRET}
@@ -79,7 +79,7 @@ HTTP_SERVER_PORT=${HTTP_SERVER_PORT} \
 OAUTH_CREDENTIALS_CLIENT_ID=${OAUTH_CREDENTIALS_CLIENT_ID} \
 OAUTH_CREDENTIALS_CLIENT_SECRET=${OAUTH_CREDENTIALS_CLIENT_SECRET} go run main.go
 ```
-### 1. Deploy to minikube
+### 2. Deploy to Kubernetes (minikube)
 Run commands in a sequence:
 ```console
 minikube addons enable ingress
@@ -109,4 +109,18 @@ oauth2-sample-ingress   nginx   *       192.168.49.2   80      13m
 Take IP from `ADDRESS` column and execute HTTP request via curl (e.g. 192.168.49.2 in output above instead of `${IP}` in command below):
 ```console
 curl -X POST 'http://${IP}/token' -u "${OAUTH_CREDENTIALS_CLIENT_ID}:${OAUTH_CREDENTIALS_CLIENT_SECRET}"
+```
+
+## Kubernetes
+Deployment to Kubernetes is pretty the same as to minikube moving from `minikube` to `kubectl` command:
+```console
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/config.yaml
+kubectl create secret generic -n oauth2-sample oauth2-sample-secrets \
+            --from-literal=OAUTH_CREDENTIALS_CLIENT_ID=${OAUTH_CREDENTIALS_CLIENT_ID} \
+            --from-literal=OAUTH_CREDENTIALS_CLIENT_SECRET=${OAUTH_CREDENTIALS_CLIENT_SECRET} \
+            --from-literal=JWT_PRIVATE_KEY="${JWT_PRIVATE_KEY}"
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/ingress.yaml
 ```
